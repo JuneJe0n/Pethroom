@@ -8,6 +8,8 @@ import os
 import whisper
 import json
 import csv
+import time
+import subprocess
 
 # Config 
 txt_file_path = "/data2/jiyoon/Pethroom/video_urls.txt"  
@@ -34,16 +36,21 @@ for i, video_url in enumerate(video_urls, 1):
     print(f"URL: {video_url}")
     
     # Extract video ID for filename
-    video_id = video_url.split('/')[-1].split('?')[0].replace('watch?v=', '')
+    if 'watch?v=' in video_url:
+        video_id = video_url.split('watch?v=')[1].split('&')[0]
+    elif 'shorts/' in video_url:
+        video_id = video_url.split('shorts/')[1].split('?')[0]
+    else:
+        video_id = video_url.split('/')[-1].split('?')[0]
     
     audio_path = f"video_{video_id}.mp3"
     csv_path = os.path.join(csv_output_dir, f"subtitle_{video_id}.csv")
     json_path = os.path.join(json_output_dir, f"subtitle_{video_id}.json")
     
     try:
-        # Download mp3 using yt-dlp
+        # Download mp3 using yt-dlp with user agent to avoid 403 errors
         print("Downloading audio...")
-        os.system(f'yt-dlp -x --audio-format mp3 -o "video_{video_id}.%(ext)s" "{video_url}"')
+        os.system(f'yt-dlp -x --audio-format mp3 --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --add-header "Accept-Language:en-US,en;q=0.9" --add-header "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" --extractor-retries 3 --fragment-retries 3 -o "video_{video_id}.%(ext)s" "{video_url}"')
         
         if not os.path.exists(audio_path):
             print(f"❌ Failed to download audio for {video_url}")

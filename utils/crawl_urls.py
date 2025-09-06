@@ -1,6 +1,11 @@
+"""
+Codes for crawling every urls from a youtube channel
+- input : channel url
+- output : txt file 
+"""
+
 import subprocess
 import json
-
 
 # --- Config ---
 file_path = '/data2/jiyoon/Pethroom/video_urls.txt'  

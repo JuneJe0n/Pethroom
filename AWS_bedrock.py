@@ -8,9 +8,6 @@ from credentials import aws_access_key_id, aws_secret_access_key, model_arn, kno
 
 # --- Config ---
 prompt = """
-KB에 있는 데이터는 csv 포맷입니다. csv에는 start, end, text의 3개의 열으로 구성되어있습니다. 
-start, end는 숫자, text는 string 타입입니다. 주어진 질문에 대해서 답변을 할 때 start,end에 해당하는 숫자만 출력하세요. 숫자 외의 다른 문자는 출력하지 마세요.
----
 질문 : 강아지 중성화 수술 시기는 언제가 적절해?
 """
 
@@ -67,7 +64,18 @@ if citations:
         print("\n--- SOURCE ---")
         for citation in citations:
             for reference in citation.get('retrievedReferences', []):
-                # Crop in case response is too long
-                content_preview = reference['content']['text'][:100]
+                content_text = reference['content']['text']
                 location = reference['location']['s3Location']['uri']
+                
+                # Extract first number after first '\r'
+                first_r_index = content_text.find('\r')
+                if first_r_index != -1:
+                    after_first_r = content_text[first_r_index + 1:]
+                    # Find the first comma to get the start time
+                    comma_index = after_first_r.find(',')
+                    if comma_index != -1:
+                        start_time = after_first_r[:comma_index].strip()
+                        print(f"- [start_time]: {start_time}")
+                
+                content_preview = content_text[:50]
                 print(f"- [content]: {content_preview}...\n- [location]: {location}\n")

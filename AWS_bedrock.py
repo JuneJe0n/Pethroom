@@ -1,4 +1,6 @@
-# Use the native inference API to send a text message to Amazon Titan Text G1 - Express.
+"""
+Codes to test kb
+"""
 
 import boto3
 import json
